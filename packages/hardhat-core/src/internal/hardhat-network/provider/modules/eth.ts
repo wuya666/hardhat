@@ -26,6 +26,7 @@ import {
   rpcFloat,
   rpcHash,
   rpcQuantity,
+  rpcStorageSlot,
 } from "../../../core/jsonrpc/types/base-types";
 import {
   optionalRpcNewBlockTag,
@@ -688,7 +689,7 @@ export class EthModule {
     return validateParams(
       params,
       rpcAddress,
-      rpcQuantity,
+      rpcStorageSlot,
       optionalRpcNewBlockTag
     );
   }
