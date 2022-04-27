@@ -1290,16 +1290,18 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT)
  * the subtasks related to compiling solidity.
  */
 subtask(TASK_COMPILE_SOLIDITY)
+  .addParam("files", undefined, undefined, types.any)
   .addParam("force", undefined, undefined, types.boolean)
   .addParam("quiet", undefined, undefined, types.boolean)
   .setAction(
     async (
-      { force, quiet }: { force: boolean; quiet: boolean },
+      { files, force, quiet }: { files: string[]; force: boolean; quiet: boolean },
       { artifacts, config, run }
     ) => {
-      const sourcePaths: string[] = await run(
-        TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS
-      );
+      const sourcePaths: string[] =
+        files === undefined
+          ? await run("compile:solidity:get-source-paths")
+          : files.map((f) => fsExtra.realpathSync(f));
 
       const sourceNames: string[] = await run(
         TASK_COMPILE_SOLIDITY_GET_SOURCE_NAMES,
@@ -1412,7 +1414,13 @@ subtask(TASK_COMPILE_GET_COMPILATION_TASKS, async (): Promise<string[]> => {
  * This is a meta-task that just gets all the compilation tasks and runs them.
  * Right now there's only a "compile solidity" task.
  */
-task(TASK_COMPILE, "Compiles the entire project, building all artifacts")
+task(TASK_COMPILE, "Compiles the entire project, building all artifacts, or compiles only files passed as positional arguments")
+  .addOptionalVariadicPositionalParam(
+    "files",
+    "The files to compile",
+    undefined,
+    types.inputFile
+  )
   .addFlag("force", "Force compilation ignoring cache")
   .addFlag("quiet", "Makes the compilation process less verbose")
   .setAction(async (compilationArgs: any, { run }) => {
